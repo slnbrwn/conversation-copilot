@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Conversation Copilot",
+  "version": "0.4.0",
+  "description": "A live teaching assistant for online conversation tutors.",
+  "permissions": [
+    "sidePanel",
+    "tabs",
+    "activeTab",
+    "tabCapture",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_title": "Open Conversation Copilot"
+  }
+}
