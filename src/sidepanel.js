@@ -1,4 +1,5 @@
 import { analyzeTranscriptChunk } from "./teaching/rule-engine.js";
+import { reviewTranscriptWithAI } from "./teaching/ai-review.js";
 // --------------------------------------------------
 // Page elements
 // --------------------------------------------------
@@ -23,7 +24,10 @@ const transcript =
  const teachingNotes =
     document.querySelector("#teaching-notes");
 
-let allTeachingFindings = [];   
+let allTeachingFindings = [];
+let aiReviewBusy = false;
+let latestAiReviewText = "";
+let aiReviewQueue = [];  
 // --------------------------------------------------
 // Settings
 // --------------------------------------------------
@@ -803,7 +807,10 @@ for (const finding of analysis.findings) {
             analysis.followUp
         );
     }
+    reviewChunkWithAI(cleanText);
+
 }
+
 
     if (isListening) {
         status.textContent =
@@ -996,5 +1003,205 @@ function renderTeachingNotes(findings, followUp) {
         `;
 
         teachingNotes.appendChild(question);
+    }
+}
+
+const checkAiButton =
+    document.querySelector("#check-ai");
+
+const aiStatus =
+    document.querySelector("#ai-status");
+
+checkAiButton.addEventListener(
+    "click",
+    async () => {
+        try {
+            if (!("LanguageModel" in self)) {
+                aiStatus.textContent =
+                    "Built-in AI is not available in this Chrome version.";
+
+                return;
+            }
+
+            checkAiButton.disabled = true;
+            aiStatus.textContent =
+                "Checking the built-in AI model...";
+
+            const availability =
+                await LanguageModel.availability({
+                    languages: ["en"]
+                });
+
+            aiStatus.textContent =
+                `AI availability: ${availability}`;
+
+            if (
+                availability === "downloadable" ||
+                availability === "downloading"
+            ) {
+                aiStatus.textContent =
+                    "The AI model needs to download. This may take a while.";
+
+                const session =
+                    await LanguageModel.create({
+                        languages: ["en"],
+
+                        monitor(monitor) {
+                            monitor.addEventListener(
+                                "downloadprogress",
+                                (event) => {
+                                    const percentage =
+                                        Math.round(
+                                            event.loaded * 100
+                                        );
+
+                                    aiStatus.textContent =
+                                        `Downloading AI model: ${percentage}%`;
+                                }
+                            );
+                        }
+                    });
+
+                session.destroy();
+
+                aiStatus.textContent =
+                    "Built-in AI is ready.";
+            } else if (
+                availability === "available"
+            ) {
+                aiStatus.textContent =
+                    "Built-in AI is ready.";
+            } else {
+                aiStatus.textContent =
+                    "This computer does not currently support the built-in AI model.";
+            }
+        } catch (error) {
+            console.error(
+                "Built-in AI check failed:",
+                error
+            );
+
+            aiStatus.textContent =
+                "AI check failed. Check the extension console.";
+        } finally {
+            checkAiButton.disabled = false;
+        }
+    }
+);
+
+function reviewChunkWithAI(text) {
+    const cleanText = String(text || "").trim();
+
+    if (
+        !cleanText ||
+        cleanText === latestAiReviewText
+    ) {
+        return;
+    }
+
+    latestAiReviewText = cleanText;
+
+    // Prevent identical overlapping chunks from entering the queue twice.
+    const alreadyQueued = aiReviewQueue.some(
+        (queuedText) =>
+            queuedText.toLowerCase() ===
+            cleanText.toLowerCase()
+    );
+
+    if (!alreadyQueued) {
+        aiReviewQueue.push(cleanText);
+    }
+
+    processNextAiReview();
+}
+
+async function processNextAiReview() {
+    if (
+        aiReviewBusy ||
+        aiReviewQueue.length === 0
+    ) {
+        return;
+    }
+
+    aiReviewBusy = true;
+
+    const textToReview =
+        aiReviewQueue.shift();
+
+    try {
+        aiStatus.textContent =
+            `Reviewing recent language... ${aiReviewQueue.length} section${aiReviewQueue.length === 1 ? "" : "s"} waiting.`;
+
+        const corrections =
+            await reviewTranscriptWithAI(
+                textToReview
+            );
+
+        let newCorrectionCount = 0;
+
+        for (const finding of corrections) {
+            if (
+                !finding ||
+                !finding.original ||
+                !finding.correction
+            ) {
+                continue;
+            }
+
+            const alreadyExists =
+                allTeachingFindings.some(
+                    (existingFinding) =>
+                        existingFinding.type ===
+                            finding.type &&
+                        existingFinding.original
+                            .toLowerCase()
+                            .trim() ===
+                            finding.original
+                                .toLowerCase()
+                                .trim() &&
+                        existingFinding.correction
+                            .toLowerCase()
+                            .trim() ===
+                            finding.correction
+                                .toLowerCase()
+                                .trim()
+                );
+
+            if (!alreadyExists) {
+                allTeachingFindings.push(
+                    finding
+                );
+
+                newCorrectionCount++;
+            }
+        }
+
+        if (newCorrectionCount > 0) {
+            renderTeachingNotes(
+                allTeachingFindings,
+                ""
+            );
+
+            aiStatus.textContent =
+                `Added ${newCorrectionCount} AI language note${newCorrectionCount === 1 ? "" : "s"}.`;
+        } else {
+            aiStatus.textContent =
+                "No additional AI corrections found.";
+        }
+    } catch (error) {
+        console.error(
+            "Automatic AI review failed:",
+            error
+        );
+
+        aiStatus.textContent =
+            "AI review failed. Moving to the next section.";
+    } finally {
+        aiReviewBusy = false;
+
+        // Automatically review the next waiting transcript chunk.
+        if (aiReviewQueue.length > 0) {
+            processNextAiReview();
+        }
     }
 }

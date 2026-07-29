@@ -1,7 +1,6 @@
 const RULES = [
     {
         id: "modal-have",
-        category: "grammar",
         pattern: /\b(could|should|would|might|must)(n't)?\s+of\b/gi,
         createFinding(match) {
             const modal = match[1];
@@ -18,51 +17,39 @@ const RULES = [
     },
 
     {
-        id: "couldnt-have",
-        category: "grammar",
-        pattern: /\bcouldnt\b/gi,
-        createFinding(match) {
-            return {
-                type: "Grammar",
-                original: match[0],
-                correction: "couldn’t",
-                explanation:
-                    "Use an apostrophe in the contraction “couldn’t.”"
-            };
-        }
-    },
-
-    {
         id: "subject-verb-he-she-it",
-        category: "grammar",
         pattern:
             /\b(he|she|it)\s+(go|want|need|like|work|live|seem|feel|think|know)\b/gi,
         createFinding(match) {
             const subject = match[1];
-            const verb = match[2];
+            const verb = match[2].toLowerCase();
 
-            const irregularForms = {
-                go: "goes"
+            const correctedForms = {
+                go: "goes",
+                want: "wants",
+                need: "needs",
+                like: "likes",
+                work: "works",
+                live: "lives",
+                seem: "seems",
+                feel: "feels",
+                think: "thinks",
+                know: "knows"
             };
-
-            const correctedVerb =
-                irregularForms[verb.toLowerCase()] ||
-                `${verb}s`;
 
             return {
                 type: "Grammar",
                 original: match[0],
                 correction:
-                    `${subject} ${correctedVerb}`,
+                    `${subject} ${correctedForms[verb]}`,
                 explanation:
-                    `In the present simple, add “-s” to the verb after “${subject}.”`
+                    `In the present simple, the verb changes after “${subject}.”`
             };
         }
     },
 
     {
         id: "people-is",
-        category: "grammar",
         pattern: /\bpeople\s+is\b/gi,
         createFinding(match) {
             return {
@@ -77,7 +64,6 @@ const RULES = [
 
     {
         id: "there-is-plural",
-        category: "grammar",
         pattern:
             /\bthere\s+is\s+(many|several|a lot of|lots of)\b/gi,
         createFinding(match) {
@@ -97,8 +83,7 @@ const RULES = [
 
     {
         id: "discuss-about",
-        category: "vocabulary",
-        pattern: /\bdiscuss(?:ed|ing)?\s+about\b/gi,
+        pattern: /\bdiscuss(?:ed|ing|es)?\s+about\b/gi,
         createFinding(match) {
             return {
                 type: "Vocabulary",
@@ -112,25 +97,15 @@ const RULES = [
     },
 
     {
-        id: "explain-me",
-        category: "grammar",
+        id: "explain-person",
         pattern:
-            /\bexplain(?:ed|ing)?\s+(me|him|her|us|them)\b/gi,
+            /\b(explain(?:ed|ing|s)?)\s+(me|him|her|us|them)\b/gi,
         createFinding(match) {
-            const pronoun =
-                match[1].toLowerCase();
-
             return {
                 type: "Grammar",
                 original: match[0],
                 correction:
-                    match[0].replace(
-                        new RegExp(
-                            `\\s+${pronoun}\\b`,
-                            "i"
-                        ),
-                        ` to ${pronoun}`
-                    ),
+                    `${match[1]} it to ${match[2]}`,
                 explanation:
                     "Use “explain something to someone.”"
             };
@@ -139,7 +114,6 @@ const RULES = [
 
     {
         id: "married-with",
-        category: "vocabulary",
         pattern: /\bmarried\s+with\b/gi,
         createFinding(match) {
             return {
@@ -154,7 +128,6 @@ const RULES = [
 
     {
         id: "depend-of",
-        category: "vocabulary",
         pattern: /\bdepend(?:s|ed|ing)?\s+of\b/gi,
         createFinding(match) {
             return {
@@ -170,7 +143,6 @@ const RULES = [
 
     {
         id: "interested-by",
-        category: "vocabulary",
         pattern: /\binterested\s+by\b/gi,
         createFinding(match) {
             return {
@@ -185,7 +157,6 @@ const RULES = [
 
     {
         id: "good-in",
-        category: "vocabulary",
         pattern: /\bgood\s+in\b/gi,
         createFinding(match) {
             return {
@@ -200,7 +171,6 @@ const RULES = [
 
     {
         id: "listen-missing-to",
-        category: "grammar",
         pattern:
             /\blisten(?:ed|ing|s)?\s+(?!to\b)(music|the radio|a podcast|him|her|me|them|us)\b/gi,
         createFinding(match) {
@@ -222,9 +192,8 @@ const RULES = [
 
     {
         id: "arrive-to",
-        category: "vocabulary",
         pattern:
-            /\barrive(?:d|s|ing)?\s+to\s+(the|a|an)\b/gi,
+            /\b(arrive(?:d|s|ing)?)\s+to\s+(the|a|an)\b/gi,
         createFinding(match) {
             return {
                 type: "Vocabulary",
@@ -239,7 +208,6 @@ const RULES = [
 
     {
         id: "spark-up-conversation",
-        category: "vocabulary",
         pattern:
             /\bspark(?:ed|ing)?\s+up\s+(a\s+)?conversation\b/gi,
         createFinding(match) {
@@ -255,7 +223,6 @@ const RULES = [
 
     {
         id: "make-a-party",
-        category: "vocabulary",
         pattern: /\bmake\s+(a\s+)?party\b/gi,
         createFinding(match) {
             return {
@@ -271,7 +238,6 @@ const RULES = [
 
     {
         id: "do-a-mistake",
-        category: "vocabulary",
         pattern: /\bdo\s+(a\s+)?mistake\b/gi,
         createFinding(match) {
             return {
@@ -285,8 +251,7 @@ const RULES = [
     },
 
     {
-        id: "more-easier",
-        category: "grammar",
+        id: "more-comparative",
         pattern:
             /\bmore\s+(easier|better|worse|faster|slower|bigger|smaller)\b/gi,
         createFinding(match) {
@@ -302,7 +267,6 @@ const RULES = [
 
     {
         id: "very-much-adjective",
-        category: "grammar",
         pattern:
             /\bvery\s+much\s+(happy|sad|tired|angry|nervous|excited|confused)\b/gi,
         createFinding(match) {
@@ -318,7 +282,6 @@ const RULES = [
 
     {
         id: "since-duration",
-        category: "grammar",
         pattern:
             /\bsince\s+(\d+\s+(?:day|days|week|weeks|month|months|year|years))\b/gi,
         createFinding(match) {
@@ -334,7 +297,6 @@ const RULES = [
 
     {
         id: "for-starting-point",
-        category: "grammar",
         pattern:
             /\bfor\s+(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|yesterday|last\s+\w+|20\d{2})\b/gi,
         createFinding(match) {
@@ -348,9 +310,389 @@ const RULES = [
         }
     },
 
+    // --------------------------------------------------
+    // New preposition and collocation rules
+    // --------------------------------------------------
+
+    {
+        id: "bring-take-at-school",
+        pattern:
+            /\b(bring|take|brought|took)\s+(.{1,35}?)\s+at\s+school\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    `${match[1]} ${match[2]} to school`,
+                explanation:
+                    "Use “to” when describing movement toward a destination."
+            };
+        }
+    },
+
+    {
+        id: "go-in-work",
+        pattern:
+            /\b(go|goes|going|went)\s+in\s+work\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    `${match[1]} to work`,
+                explanation:
+                    "The usual expression is “go to work.”"
+            };
+        }
+    },
+
+    {
+        id: "help-for",
+        pattern:
+            /\b(help|helped|helping)\s+(me|him|her|us|them)?\s*for\s+(something|anything|this|that|the\s+\w+|\w+ing)\b/gi,
+        createFinding(match) {
+            const person =
+                match[2] ? ` ${match[2]}` : "";
+
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    `${match[1]}${person} with ${match[3]}`,
+                explanation:
+                    "Use “help with” before a task, problem, or activity."
+            };
+        }
+    },
+
+    {
+        id: "need-help-for",
+        pattern:
+            /\bneed(?:s|ed)?\s+help\s+for\s+(.{1,30})/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    `need help with ${match[1]}`,
+                explanation:
+                    "Use “help with” before the thing causing difficulty."
+            };
+        }
+    },
+
+    {
+        id: "responsible-of",
+        pattern: /\bresponsible\s+of\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction: "responsible for",
+                explanation:
+                    "The usual expression is “responsible for.”"
+            };
+        }
+    },
+
+    {
+        id: "afraid-from",
+        pattern: /\bafraid\s+from\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction: "afraid of",
+                explanation:
+                    "The usual expression is “afraid of.”"
+            };
+        }
+    },
+
+    {
+        id: "wait-missing-for",
+        pattern:
+            /\b(wait|waited|waiting|waits)\s+(me|him|her|us|them|you|somebody|someone|people)\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    `${match[1]} for ${match[2]}`,
+                explanation:
+                    "Use “wait for” before the person or thing you are expecting."
+            };
+        }
+    },
+
+    {
+        id: "ask-to-person",
+        pattern:
+            /\b(ask|asked|asking|asks)\s+to\s+(me|him|her|us|them|you|someone|somebody)\b/gi,
+        createFinding(match) {
+            return {
+                type: "Grammar",
+                original: match[0],
+                correction:
+                    `${match[1]} ${match[2]}`,
+                explanation:
+                    "Use “ask someone,” without “to,” when requesting information."
+            };
+        }
+    },
+
+    {
+        id: "enter-into-place",
+        pattern:
+            /\b(enter|entered|entering|enters)\s+into\s+(the|a|an)\s+(room|building|house|office|store|shop|classroom)\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    `${match[1]} ${match[2]} ${match[3]}`,
+                explanation:
+                    "“Enter” normally takes a place directly, without “into.”"
+            };
+        }
+    },
+
+    {
+        id: "contact-to-person",
+        pattern:
+            /\b(contact|contacted|contacting|contacts)\s+to\s+(me|him|her|us|them|you|someone|somebody)\b/gi,
+        createFinding(match) {
+            return {
+                type: "Grammar",
+                original: match[0],
+                correction:
+                    `${match[1]} ${match[2]}`,
+                explanation:
+                    "Use “contact someone,” without “to.”"
+            };
+        }
+    },
+
+    {
+        id: "call-to-person",
+        pattern:
+            /\b(call|called|calling|calls)\s+to\s+(me|him|her|us|them|you|someone|somebody)\b/gi,
+        createFinding(match) {
+            return {
+                type: "Grammar",
+                original: match[0],
+                correction:
+                    `${match[1]} ${match[2]}`,
+                explanation:
+                    "Use “call someone,” without “to.”"
+            };
+        }
+    },
+
+    {
+        id: "answer-to-person",
+        pattern:
+            /\b(answer|answered|answering|answers)\s+to\s+(me|him|her|us|them|you|someone|somebody)\b/gi,
+        createFinding(match) {
+            return {
+                type: "Grammar",
+                original: match[0],
+                correction:
+                    `${match[1]} ${match[2]}`,
+                explanation:
+                    "Use “answer someone,” without “to.”"
+            };
+        }
+    },
+
+    {
+        id: "attend-to-event",
+        pattern:
+            /\b(attend|attended|attending|attends)\s+to\s+(the|a|an)\s+(meeting|class|event|conference|lesson|party)\b/gi,
+        createFinding(match) {
+            return {
+                type: "Grammar",
+                original: match[0],
+                correction:
+                    `${match[1]} ${match[2]} ${match[3]}`,
+                explanation:
+                    "Use “attend an event,” without “to.”"
+            };
+        }
+    },
+
+    {
+        id: "participate-to",
+        pattern:
+            /\b(participate|participated|participating|participates)\s+to\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    `${match[1]} in`,
+                explanation:
+                    "The usual expression is “participate in.”"
+            };
+        }
+    },
+
+    {
+        id: "concentrate-in",
+        pattern:
+            /\b(concentrate|concentrated|concentrating|concentrates)\s+in\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    `${match[1]} on`,
+                explanation:
+                    "The usual expression is “concentrate on.”"
+            };
+        }
+    },
+
+    {
+        id: "focus-in",
+        pattern:
+            /\b(focus|focused|focusing|focuses)\s+in\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    `${match[1]} on`,
+                explanation:
+                    "The usual expression is “focus on.”"
+            };
+        }
+    },
+
+    {
+        id: "pay-attention-in",
+        pattern:
+            /\bpay(?:ing|s|ed)?\s+attention\s+in\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    match[0].replace(/\bin\b/i, "to"),
+                explanation:
+                    "The usual expression is “pay attention to.”"
+            };
+        }
+    },
+
+    {
+        id: "proud-for",
+        pattern: /\bproud\s+for\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction: "proud of",
+                explanation:
+                    "Use “proud of” before a person, achievement, or action."
+            };
+        }
+    },
+
+    {
+        id: "worried-for-thing",
+        pattern:
+            /\bworried\s+for\s+(the\s+)?(exam|test|situation|problem|future|result|results|weather)\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    match[0].replace(/\bfor\b/i, "about"),
+                explanation:
+                    "Use “worried about” for a situation or concern."
+            };
+        }
+    },
+
+    {
+        id: "angry-against",
+        pattern: /\bangry\s+against\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    "angry with / angry at",
+                explanation:
+                    "Use “angry with” a person or “angry at” a situation."
+            };
+        }
+    },
+
+    {
+        id: "different-than-from",
+        pattern: /\bdifferent\s+that\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    "different from / different than",
+                explanation:
+                    "Use “different from” or, in some contexts, “different than.”"
+            };
+        }
+    },
+
+    {
+        id: "similar-with",
+        pattern: /\bsimilar\s+with\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction: "similar to",
+                explanation:
+                    "The usual expression is “similar to.”"
+            };
+        }
+    },
+
+    {
+        id: "apply-on-job",
+        pattern:
+            /\b(apply|applied|applying|applies)\s+on\s+(a|the|this|that)\s+(job|position|role)\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    `${match[1]} for ${match[2]} ${match[3]}`,
+                explanation:
+                    "Use “apply for” when seeking a job or position."
+            };
+        }
+    },
+
+    {
+        id: "graduate-of",
+        pattern:
+            /\b(graduate|graduated|graduating)\s+of\s+(school|college|university)\b/gi,
+        createFinding(match) {
+            return {
+                type: "Preposition",
+                original: match[0],
+                correction:
+                    `${match[1]} from ${match[2]}`,
+                explanation:
+                    "Use “graduate from” a school, college, or university."
+            };
+        }
+    },
+
     {
         id: "filler-like",
-        category: "fluency",
         pattern: /\blike\b/gi,
         minimumCount: 5,
         createFinding(match, context) {
@@ -368,7 +710,6 @@ const RULES = [
 
     {
         id: "filler-you-know",
-        category: "fluency",
         pattern: /\byou know\b/gi,
         minimumCount: 4,
         createFinding(match, context) {
