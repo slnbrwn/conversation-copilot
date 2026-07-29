@@ -41,15 +41,28 @@
             </p>
         </section>
 
-        <section class="transcript-card">
-            <h2>Transcript</h2>
-            <p id="transcript">
-                Transcription comes next. First, we’re confirming that tab
-                audio reaches the extension.
-            </p>
-        </section>
-    </main>
+<button id="load-whisper" type="button">
+    Load Whisper
+</button>
 
-    <script src="sidepanel.js"></script>
+<p id="whisper-status">
+    Whisper is not loaded.
+</p>
+
+<button id="test-whisper" type="button" disabled>
+    Test Transcription
+</button>
+
+<section class="transcript-card">
+    <h2>Transcript</h2>
+
+    <p id="transcript">
+        Transcription comes next. First, we're confirming that tab audio reaches the extension.
+    </p>
+</section>
+
+</main>
+
+<script type="module" src="/src/sidepanel.js"></script>
 </body>
 </html>
