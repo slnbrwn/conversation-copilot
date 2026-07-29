@@ -1,0 +1,109 @@
+let mediaStream = null;
+let audioContext = null;
+let analyser = null;
+let animationFrameId = null;
+
+chrome.runtime.onMessage.addListener((message) => {
+    if (
+        message.target === "offscreen" &&
+        message.type === "START_CAPTURE"
+    ) {
+        startCapture(message.streamId).catch((error) => {
+            console.error("Could not start audio capture:", error);
+
+            chrome.runtime.sendMessage({
+                type: "CAPTURE_ERROR",
+                error: error.message
+            });
+        });
+    }
+});
+
+async function startCapture(streamId) {
+    await stopCapture();
+
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+            mandatory: {
+                chromeMediaSource: "tab",
+                chromeMediaSourceId: streamId
+            }
+        },
+        video: false
+    });
+
+    const audioTrack = mediaStream.getAudioTracks()[0];
+
+    if (!audioTrack) {
+        throw new Error("Chrome created the stream, but it has no audio track.");
+    }
+
+    audioContext = new AudioContext();
+
+    if (audioContext.state === "suspended") {
+        await audioContext.resume();
+    }
+
+    const source = audioContext.createMediaStreamSource(mediaStream);
+
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 2048;
+    analyser.smoothingTimeConstant = 0.7;
+
+    source.connect(analyser);
+
+    // Preserve normal playback while the tab is being captured.
+    source.connect(audioContext.destination);
+
+    chrome.runtime.sendMessage({
+        type: "CAPTURE_STARTED",
+        audioContextState: audioContext.state,
+        trackState: audioTrack.readyState
+    });
+
+    measureAudioLevel();
+}
+
+function measureAudioLevel() {
+    if (!analyser || !audioContext) {
+        return;
+    }
+
+    const samples = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(samples);
+
+    let total = 0;
+
+    for (const sample of samples) {
+        total += sample;
+    }
+
+    const average = total / samples.length;
+    const level = Math.min(100, Math.round(average * 1.8));
+
+    chrome.runtime.sendMessage({
+        type: "AUDIO_LEVEL",
+        level
+    });
+
+    animationFrameId = requestAnimationFrame(measureAudioLevel);
+}
+
+async function stopCapture() {
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
+
+    if (mediaStream) {
+        mediaStream.getTracks().forEach((track) => track.stop());
+        mediaStream = null;
+    }
+
+    analyser = null;
+
+    if (audioContext) {
+        await audioContext.close();
+        audioContext = null;
+    }
+}

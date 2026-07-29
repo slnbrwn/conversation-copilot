@@ -2,27 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
     <title>Conversation Copilot</title>
     <link rel="stylesheet" href="sidepanel.css">
 </head>
+
 <body>
+    <main class="app">
+        <header>
+            <p class="eyebrow">Live lesson assistant</p>
+            <h1>Conversation Copilot</h1>
+        </header>
 
-<h1>Conversation Copilot</h1>
+        <button id="startBtn" type="button">
+            Start Listening
+        </button>
 
-<button id="startBtn">
-    Start Listening
-</button>
+        <p id="status" class="status">
+            Ready
+        </p>
 
-<div id="status">
-    Ready
-</div>
+        <section class="audio-card">
+            <div class="audio-heading">
+                <span>Tab audio</span>
+                <span id="levelText">0%</span>
+            </div>
 
-<div id="transcript">
-    Waiting for transcript...
-</div>
+            <div class="meter" aria-label="Live tab-audio level">
+                <div id="meterFill" class="meter-fill"></div>
+            </div>
 
-<script src="sidepanel.js"></script>
+            <p class="hint">
+                Play audio in the lesson tab. The meter should move when
+                Conversation Copilot can hear it.
+            </p>
+        </section>
 
+        <section class="transcript-card">
+            <h2>Transcript</h2>
+            <p id="transcript">
+                Transcription comes next. First, we’re confirming that tab
+                audio reaches the extension.
+            </p>
+        </section>
+    </main>
+
+    <script src="sidepanel.js"></script>
 </body>
 </html>

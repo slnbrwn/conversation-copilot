@@ -1,39 +1,127 @@
-body{
-    font-family:Arial,sans-serif;
-    padding:20px;
-    background:#fafafa;
+:root {
+    color-scheme: light;
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
 }
 
-h1{
-    font-size:22px;
-    margin-bottom:20px;
+* {
+    box-sizing: border-box;
 }
 
-button{
-    width:100%;
-    padding:14px;
-    border:none;
-    border-radius:10px;
-    background:black;
-    color:white;
-    font-size:16px;
-    cursor:pointer;
+body {
+    margin: 0;
+    background: #f5f5f2;
+    color: #181818;
 }
 
-button:hover{
-    opacity:.9;
+button,
+input,
+textarea {
+    font: inherit;
 }
 
-#status{
-    margin-top:20px;
-    font-weight:bold;
+.app {
+    display: grid;
+    gap: 18px;
+    padding: 22px 18px;
 }
 
-#transcript{
-    margin-top:15px;
-    background:white;
-    border-radius:10px;
-    padding:15px;
-    min-height:200px;
-    border:1px solid #ddd;
+header {
+    display: grid;
+    gap: 4px;
+}
+
+.eyebrow {
+    margin: 0;
+    color: #686868;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+    margin-top: 0;
+}
+
+h1 {
+    margin-bottom: 0;
+    font-size: 25px;
+    line-height: 1.1;
+}
+
+h2 {
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+#startBtn {
+    width: 100%;
+    border: 0;
+    border-radius: 12px;
+    padding: 13px 16px;
+    background: #181818;
+    color: white;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+#startBtn:disabled {
+    cursor: default;
+    opacity: 0.65;
+}
+
+.status {
+    min-height: 20px;
+    margin-bottom: 0;
+    color: #565656;
+    font-size: 14px;
+}
+
+.audio-card,
+.transcript-card {
+    border: 1px solid #ddddda;
+    border-radius: 14px;
+    padding: 16px;
+    background: white;
+}
+
+.audio-heading {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.meter {
+    width: 100%;
+    height: 14px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #ececea;
+}
+
+.meter-fill {
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: #181818;
+    transition: width 80ms linear;
+}
+
+.hint,
+#transcript {
+    margin-bottom: 0;
+    color: #626262;
+    font-size: 13px;
+    line-height: 1.5;
 }
